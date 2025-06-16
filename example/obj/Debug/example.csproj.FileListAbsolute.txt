@@ -11,3 +11,5 @@ C:\Users\ray.luo\Downloads\NET_SDK-main\example\obj\Debug\example.csproj.CoreCom
 C:\Users\ray.luo\Downloads\NET_SDK-main\example\obj\Debug\example.csproj.CopyComplete
 C:\Users\ray.luo\Downloads\NET_SDK-main\example\obj\Debug\example.dll
 C:\Users\ray.luo\Downloads\NET_SDK-main\example\obj\Debug\example.pdb
+Y:\GitRepository\PAYUNi.Net\example\obj\Debug\example.dll
+Y:\GitRepository\PAYUNi.Net\example\obj\Debug\example.pdb

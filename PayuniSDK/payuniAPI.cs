@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
@@ -7,9 +6,9 @@ using System.Web;
 using Org.BouncyCastle.Crypto.Engines;
 using Org.BouncyCastle.Crypto.Modes;
 using Org.BouncyCastle.Crypto.Parameters;
-using Newtonsoft.Json;
 using System.Net;
 using System.IO;
+using Newtonsoft.Json;
 
 namespace payuniSDK
 {
@@ -193,7 +192,7 @@ namespace payuniSDK
                         else
                         {
                             string CurlResult = CurlApi();
-                            return JsonConvert.SerializeObject(ResultProcess(CurlResult));
+                            return  JsonConvert.SerializeObject(ResultProcess(CurlResult));
                         }
                     }
                     else {
@@ -296,7 +295,7 @@ namespace payuniSDK
             request.ContentType = "application/x-www-form-urlencoded";
             request.Timeout = 1000;
             request.ContentLength = postData.Length;
-            request.UserAgent = "PRESCOSDKAPI";
+            request.Headers["User-Agent"] = "PRESCOSDKAPI";
 
             // 寫入 Post Body Message 資料流
             using (Stream st = request.GetRequestStream())
