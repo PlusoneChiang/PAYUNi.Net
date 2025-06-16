@@ -1,11 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "gb6QjjlZ9ok=",
+  "dgSpecHash": "bYV+7GqoPzg=",
   "success": true,
   "projectFilePath": "/Users/plusone/WorkSpace/GitRepository/PAYUNi.Net/testuni/testuni.csproj",
-  "expectedPackageFiles": [
-    "/Users/plusone/.nuget/packages/newtonsoft.json/13.0.3/newtonsoft.json.13.0.3.nupkg.sha512",
-    "/Users/plusone/.nuget/packages/portable.bouncycastle/1.9.0/portable.bouncycastle.1.9.0.nupkg.sha512"
-  ],
+  "expectedPackageFiles": [],
   "logs": []
 }

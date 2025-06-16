@@ -9,8 +9,4 @@
     <AssemblyVersion>1.10.8930.18610</AssemblyVersion>
     <FileVersion>1.10.8930.18610</FileVersion>
   </PropertyGroup>
-  <ItemGroup>
-    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
-    <PackageReference Include="Portable.BouncyCastle" Version="1.9.0" />
-  </ItemGroup>
 </Project>
