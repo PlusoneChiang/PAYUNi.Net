@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace payuniSDK;
 
-public class payuniAPI
+public class PayuniAPI
 {
     /// <summary>
     /// 加密資訊
@@ -46,9 +46,89 @@ public class payuniAPI
     /// <summary>
     /// 型態
     /// </summary>
-    public static string Type { get; set; }
+    public static EnviromentType Type { get; set; }
 
-    public payuniAPI(string key, string iv, string type="")
+    public enum EnviromentType
+    {
+        /// <summary>
+        /// 連線測試區
+        /// </summary>
+        SandBox,
+        /// <summary>
+        /// 連線正式區
+        /// </summary>
+        Production
+    }
+
+    public enum TradeType
+    {
+        /// <summary>
+        /// 交易建立 整合式
+        /// </summary>
+        Upp,
+        /// <summary>
+        /// 交易建立 虛擬帳號幕後
+        /// </summary>
+        Atm,
+        /// <summary>
+        /// 交易建立 超商代碼幕後
+        /// </summary>
+        Cvs,
+        /// <summary>
+        /// 交易建立 Line Pay 幕後
+        /// </summary>
+        Linepay,
+        /// <summary>
+        /// 交易建立 Aftee 幕後
+        /// </summary>
+        AfteeDirect,
+        /// <summary>
+        /// 交易建立 信用卡幕後
+        /// </summary>
+        Credit,
+        /// <summary>
+        /// 交易請退款
+        /// </summary>
+        TradeClose,
+        /// <summary>
+        /// 交易取消授權
+        /// </summary>
+        TradeCancel,
+        /// <summary>
+        /// 後支付確認(Aftee)
+        /// </summary>
+        TradeConfirmAftee,
+        /// <summary>
+        /// 交易取消超商代碼(Cvs)
+        /// </summary>
+        CancelCvs,
+        /// <summary>
+        /// 信用卡Token取消(約定/記憶卡號)
+        /// </summary>
+        CreditBindCancel,
+        /// <summary>
+        /// 愛金卡退款(Icash)
+        /// </summary>
+        TradeRefundIcash,
+        /// <summary>
+        /// 後支付退款(Aftee)
+        /// </summary>
+        TradeRefundAftee,
+        /// <summary>
+        /// Line Pay退款(Line)
+        /// </summary>
+        TradeRefundLinepay,
+        /// <summary>
+        /// 交易查詢
+        /// </summary>
+        TradeQuery,
+        /// <summary>
+        /// 信用卡Token查詢(約定)
+        /// </summary>
+        CreditBindQuery,
+    }
+
+    public PayuniAPI(string key, string iv, EnviromentType type = EnviromentType.Production)
     {
         EncryptInfo = new EncryptInfoModel();
         Parameter = new ParameterModel();
@@ -58,7 +138,7 @@ public class payuniAPI
         Type = type;
         ApiUrl = "api.payuni.com.tw/api/";
         Prefix = "https://";
-        if (Type == "t")
+        if (Type == EnviromentType.SandBox)
         {
             Prefix += "sandbox-";
         }
@@ -72,7 +152,7 @@ public class payuniAPI
     /// <param name="tradeType"></param>
     /// <param name="version"></param>
     /// <returns></returns>
-    public string UniversalTrade(EncryptInfoModel EnInfo, string tradeType,string version = "1.0")
+    public string UniversalTrade(EncryptInfoModel EnInfo, TradeType tradeType, string version = "1.0")
     {
         EncryptInfo = EnInfo;
         Parameter.Version = version;
@@ -83,12 +163,12 @@ public class payuniAPI
             {
                 switch (tradeType)
                 {
-                    case "upp":// 交易建立 整合式支付頁
-                    case "atm":// 交易建立 虛擬帳號幕後
-                    case "cvs":// 交易建立 超商代碼幕後
-                    case "linepay":// 交易建立 Line Pay 幕後
-                    case "aftee_direct"://交易建立 AFTEE 幕後
-                        if (tradeType == "linepay") 
+                    case TradeType.Upp:// 交易建立 整合式支付頁
+                    case TradeType.Atm:// 交易建立 虛擬帳號幕後
+                    case TradeType.Cvs:// 交易建立 超商代碼幕後
+                    case TradeType.Linepay:// 交易建立 Line Pay 幕後
+                    case TradeType.AfteeDirect://交易建立 AFTEE 幕後
+                        if (tradeType == TradeType.Linepay)
                         {
                             Parameter.Version = "1.1";
                         }
@@ -101,7 +181,7 @@ public class payuniAPI
                             Result.Message = "訂單金額為必填(TradeAmt is not setting)";
                         }
                         break;
-                    case "credit":// 交易建立 信用卡幕後
+                    case TradeType.Credit:// 交易建立 信用卡幕後
                         if (string.IsNullOrEmpty(EncryptInfo.MerTradeNo))
                         {
                             Result.Message = "商店訂單編號為必填(MerTradeNo is not setting)";
@@ -125,7 +205,7 @@ public class payuniAPI
                             }
                         }                        
                         break;
-                    case "trade_close":// 交易請退款
+                    case TradeType.TradeClose:// 交易請退款
                         if (string.IsNullOrEmpty(EncryptInfo.TradeNo))
                         {
                             Result.Message = "uni序號為必填(TradeNo is not setting)";
@@ -135,20 +215,20 @@ public class payuniAPI
                             Result.Message = "關帳類型為必填(CloseType is not setting)";
                         }
                         break;
-                    case "trade_cancel":// 交易取消授權
-                    case "trade_confirm_aftee":// 後支付確認(AFTEE)
+                    case TradeType.TradeCancel:// 交易取消授權
+                    case TradeType.TradeConfirmAftee:// 後支付確認(AFTEE)
                         if (string.IsNullOrEmpty(EncryptInfo.TradeNo))
                         {
                             Result.Message = "uni序號為必填(TradeNo is not setting)";
                         }
                         break;
-                    case "cancel_cvs": // 交易取消超商代碼(CVS)
+                    case TradeType.CancelCvs:// 交易取消超商代碼(CVS)
                         if (string.IsNullOrEmpty(EncryptInfo.PayNo))
                         {
                             Result.Message = "超商代碼為必填(PayNo is not setting)";
                         }
                         break;
-                    case "credit_bind_cancel":// 信用卡token取消(約定/記憶卡號)
+                    case TradeType.CreditBindCancel:// 信用卡token取消(約定/記憶卡號)
                         if (string.IsNullOrEmpty(EncryptInfo.UseTokenType))
                         {
                             Result.Message = "信用卡Token類型為必填(UseTokenType is not setting)";
@@ -158,9 +238,9 @@ public class payuniAPI
                             Result.Message = "綁定回傳值 /信用卡Token(BindVal is not setting)";
                         }
                         break;
-                    case "trade_refund_icash":// 愛金卡退款(ICASH)
-                    case "trade_refund_aftee":// 後支付退款(AFTEE)
-                    case "trade_refund_linepay":// LINE Pay退款(LINE)
+                    case TradeType.TradeRefundIcash:// 愛金卡退款(ICASH)
+                    case TradeType.TradeRefundAftee:// 後支付退款(AFTEE)
+                    case TradeType.TradeRefundLinepay:// LINE Pay退款(LINE)
                         if (string.IsNullOrEmpty(EncryptInfo.TradeNo))
                         {
                             Result.Message = "uni序號為必填(TradeNo is not setting)";
@@ -170,8 +250,8 @@ public class payuniAPI
                             Result.Message = "訂單金額為必填(TradeAmt is not setting)";
                         }
                         break;
-                    case "trade_query":// 交易查詢
-                    case "credit_bind_query":// 信用卡token查詢(約定)
+                    case TradeType.TradeQuery:// 交易查詢
+                    case TradeType.CreditBindQuery:// 信用卡token查詢(約定)
                         break;
                     default:
                         Result.Message = "未提供該參數類型(Unknown params)";
@@ -180,9 +260,9 @@ public class payuniAPI
 
                 if (string.IsNullOrEmpty(Result.Message))
                 {
-                    SetParams(contrast(tradeType));
+                    SetParams(Contrast(tradeType));
 
-                    if (tradeType == "upp")
+                    if (tradeType == TradeType.Upp)
                     {
                         return HtmlApi();
                     }
@@ -300,39 +380,28 @@ public class payuniAPI
     /// </summary>
     /// <param name="tradeType"></param>
     /// <returns></returns>
-    private string contrast(string tradeType)
+    private static string Contrast(TradeType tradeType)
     {
-        switch (tradeType)
+        return tradeType switch
         {
-            case "trade_query":
-                tradeType = "trade/query";
-                break;
-            case "trade_close":
-                tradeType = "trade/close";
-                break;
-            case "trade_cancel":
-                tradeType = "trade/cancel";
-                break;
-            case "credit_bind_query":
-                tradeType = "credit_bind/query";
-                break;
-            case "credit_bind_cancel":
-                tradeType = "credit_bind/cancel";
-                break;
-            case "trade_refund_icash":
-                tradeType = "trade/common/refund/icash";
-                break;
-            case "trade_refund_aftee":
-                tradeType = "trade/common/refund/aftee";
-                break;
-            case "trade_confirm_aftee":
-                tradeType = "trade/common/confirm/aftee";
-                break;
-            case "trade_refund_linepay":
-                tradeType = "trade/common/refund/linepay";
-                break;
-        }
-        return tradeType;
+            TradeType.Upp => "upp",
+            TradeType.Atm => "atm",
+            TradeType.Cvs => "cvs",
+            TradeType.Linepay => "linepay",
+            TradeType.AfteeDirect => "aftee_direct",
+            TradeType.Credit => "credit",
+            TradeType.CancelCvs => "cancel_cvs",
+            TradeType.TradeQuery => "trade/query",
+            TradeType.TradeClose => "trade/close",
+            TradeType.TradeCancel => "trade/cancel",
+            TradeType.CreditBindQuery => "credit_bind/query",
+            TradeType.CreditBindCancel => "credit_bind/cancel",
+            TradeType.TradeRefundIcash => "trade/common/refund/icash",
+            TradeType.TradeRefundAftee => "trade/common/refund/aftee",
+            TradeType.TradeConfirmAftee => "trade/common/confirm/aftee",
+            TradeType.TradeRefundLinepay => "trade/common/refund/linepay",
+            _ => throw new ArgumentOutOfRangeException(nameof(tradeType), tradeType, null)
+        };
     }
     /// <summary>
     /// 設定要curl的參數

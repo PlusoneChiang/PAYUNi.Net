@@ -1,9 +1,6 @@
 ﻿using payuniSDK;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using static payuniSDK.PayuniAPI;
 
 namespace example.examples.cardit_bind
 {
@@ -12,7 +9,7 @@ namespace example.examples.cardit_bind
         /// <summary>
         /// api宣告
         /// </summary>
-        public payuniAPI payuniapi;
+        public PayuniAPI payuniapi;
         /// <summary>
         /// 加密資訊宣告
         /// </summary>
@@ -20,7 +17,7 @@ namespace example.examples.cardit_bind
         public CardBind(string request) {
              string key = "12345678901234567890123456789012";
              string iv = "1234567890123456";
-             payuniapi = new payuniAPI(key, iv);
+             payuniapi = new PayuniAPI(key, iv);
         }
         /// <summary>
         /// trade bind query sample code
@@ -30,7 +27,7 @@ namespace example.examples.cardit_bind
             info = new EncryptInfoModel();
             info.MerID = "abc";
             info.Timestamp = DateTimeOffset.UtcNow.ToUnixTimeSeconds().ToString();
-            string result = payuniapi.UniversalTrade(info, "credit_bind_query");
+            string result = payuniapi.UniversalTrade(info, TradeType.CreditBindQuery);
         }
         /// <summary>
         /// treade bind cancel sample code
@@ -42,7 +39,7 @@ namespace example.examples.cardit_bind
             info.Timestamp = DateTimeOffset.UtcNow.ToUnixTimeSeconds().ToString();
             info.UseTokenType = "1";
             info.BindVal = "1";
-            string result = payuniapi.UniversalTrade(info, "credit_bind_cancel");
+            string result = payuniapi.UniversalTrade(info, TradeType.CreditBindCancel);
         }
     }
 

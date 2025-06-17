@@ -2,7 +2,6 @@
   <PropertyGroup>
     <OutputType>Library</OutputType>
     <TargetFramework>net8.0</TargetFramework>
-    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
     <AssemblyTitle>payuniSDK</AssemblyTitle>
     <Product>payuniSDK</Product>
     <Copyright>Copyright ©  2022</Copyright>
