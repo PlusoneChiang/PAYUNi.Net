@@ -1,7 +1,8 @@
-﻿using payuniSDK;
+﻿using PayuniSDK.APIs;
+using PayuniSDK.Enums;
+using PayuniSDK.Models;
 using System;
 using System.Web;
-using static payuniSDK.PayuniAPI;
 
 namespace testuni
 {

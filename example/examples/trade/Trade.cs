@@ -1,6 +1,7 @@
-﻿using payuniSDK;
+﻿using PayuniSDK.Models;
+using PayuniSDK.APIs;
+using PayuniSDK.Enums;
 using System;
-using static payuniSDK.PayuniAPI;
 
 namespace example.examples.trade
 {

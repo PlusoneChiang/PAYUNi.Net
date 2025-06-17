@@ -1,6 +1,7 @@
-﻿using payuniSDK;
+﻿using PayuniSDK.Enums;
+using PayuniSDK.APIs;
+using PayuniSDK.Models;
 using System;
-using static payuniSDK.PayuniAPI;
 
 namespace example.examples.cardit_bind
 {
