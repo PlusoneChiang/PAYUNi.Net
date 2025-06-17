@@ -1,9 +1,7 @@
-﻿using payuniSDK;
+﻿using PayuniSDK.Models;
+using PayuniSDK.APIs;
+using PayuniSDK.Enums;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace example.examples.trade
 {
@@ -12,7 +10,7 @@ namespace example.examples.trade
         /// <summary>
         /// api宣告
         /// </summary>
-        public payuniAPI payuniapi;
+        public PayuniAPI payuniapi;
         /// <summary>
         /// 加密資訊宣告
         /// </summary>
@@ -22,7 +20,7 @@ namespace example.examples.trade
         {
             string key = "12345678901234567890123456789012";
             string iv = "1234567890123456";
-            payuniapi = new payuniAPI(key, iv);
+            payuniapi = new PayuniAPI(key, iv);
         }
 
         /// <summary>
@@ -35,7 +33,7 @@ namespace example.examples.trade
             info.MerTradeNo = "test20220829111528";
             info.Timestamp = DateTimeOffset.UtcNow.ToUnixTimeSeconds().ToString();
 
-            string result = payuniapi.UniversalTrade(info, "trade_query");
+            string result = payuniapi.UniversalTrade(info, TradeType.TradeQuery);
         }
 
         /// <summary>
@@ -49,7 +47,7 @@ namespace example.examples.trade
             info.CloseType = "1";
             info.Timestamp = DateTimeOffset.UtcNow.ToUnixTimeSeconds().ToString();
 
-            string result = payuniapi.UniversalTrade(info, "trade_close");
+            string result = payuniapi.UniversalTrade(info, TradeType.TradeClose);
         }
 
         /// <summary>
@@ -62,7 +60,7 @@ namespace example.examples.trade
             info.MerTradeNo = "16614190477810373246";
             info.Timestamp = DateTimeOffset.UtcNow.ToUnixTimeSeconds().ToString();
 
-            string result = payuniapi.UniversalTrade(info, "trade_cancel");
+            string result = payuniapi.UniversalTrade(info, TradeType.TradeCancel);
         }
 
         /// <summary>
@@ -76,7 +74,7 @@ namespace example.examples.trade
             info.TradeAmt = "100";
             info.Timestamp = DateTimeOffset.UtcNow.ToUnixTimeSeconds().ToString();
 
-            string result = payuniapi.UniversalTrade(info, "trade_refund_icash");
+            string result = payuniapi.UniversalTrade(info, TradeType.TradeRefundIcash);
         }
 
         /// <summary>
@@ -90,7 +88,7 @@ namespace example.examples.trade
             info.TradeAmt = "100";
             info.Timestamp = DateTimeOffset.UtcNow.ToUnixTimeSeconds().ToString();
 
-            string result = payuniapi.UniversalTrade(info, "trade_refund_aftee");
+            string result = payuniapi.UniversalTrade(info, TradeType.TradeRefundAftee);
         }
     }
 }

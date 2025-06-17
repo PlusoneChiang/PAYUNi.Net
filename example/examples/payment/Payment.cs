@@ -1,9 +1,7 @@
-﻿using payuniSDK;
+﻿using PayuniSDK.Enums;
+using PayuniSDK.APIs;
+using PayuniSDK.Models;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace example.examples.payment
 {
@@ -12,7 +10,7 @@ namespace example.examples.payment
         /// <summary>
         /// api宣告
         /// </summary>
-        public payuniAPI payuniapi;
+        public PayuniAPI payuniapi;
         /// <summary>
         /// 加密資訊宣告
         /// </summary>
@@ -21,7 +19,7 @@ namespace example.examples.payment
         {
             string key = "12345678901234567890123456789012";
             string iv = "1234567890123456";
-            payuniapi = new payuniAPI(key, iv);
+            payuniapi = new PayuniAPI(key, iv);
         }
 
         /// <summary>
@@ -35,7 +33,7 @@ namespace example.examples.payment
             info.Timestamp = DateTimeOffset.UtcNow.ToUnixTimeSeconds().ToString();
             info.ReturnURL = "http://www.test.com.tw/api/return";
             info.NotifyURL = "http://www.test.com.tw/api/notify";
-            string result = payuniapi.UniversalTrade(info, "upp");
+            string result = payuniapi.UniversalTrade(info, TradeType.Upp);
         }
 
         /// <summary>
@@ -71,7 +69,7 @@ namespace example.examples.payment
             info.CardExpired = "1230";
             info.Timestamp = DateTimeOffset.UtcNow.ToUnixTimeSeconds().ToString();
             
-            string result = payuniapi.UniversalTrade(info, "credit");
+            string result = payuniapi.UniversalTrade(info, TradeType.Credit);
         }
 
         /// <summary>
@@ -86,7 +84,7 @@ namespace example.examples.payment
             info.BankType = "822";
             info.Timestamp = DateTimeOffset.UtcNow.ToUnixTimeSeconds().ToString();
 
-            string result = payuniapi.UniversalTrade(info, "atm");
+            string result = payuniapi.UniversalTrade(info, TradeType.Atm);
         }
 
         /// <summary>
@@ -100,7 +98,7 @@ namespace example.examples.payment
             info.TradeAmt = "100";
             info.Timestamp = DateTimeOffset.UtcNow.ToUnixTimeSeconds().ToString();
 
-            string result = payuniapi.UniversalTrade(info, "cvs");
+            string result = payuniapi.UniversalTrade(info, TradeType.Cvs);
         }
     }
 }

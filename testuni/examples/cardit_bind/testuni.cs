@@ -1,4 +1,6 @@
-﻿using payuniSDK;
+﻿using PayuniSDK.APIs;
+using PayuniSDK.Enums;
+using PayuniSDK.Models;
 using System;
 using System.Web;
 
@@ -10,8 +12,8 @@ namespace testuni
         {
             string key = "RgVEIpc55RolRo3ji91UsDiNb3OcYVG8";
             string iv = "z6dHDPE0PbQ1C4JN";
-            string type = "t";
-            string tradeType = "trade_refund_linepay";
+            var type = EnviromentType.SandBox;
+            var tradeType = TradeType.TradeRefundLinepay;
             EncryptInfoModel info = new EncryptInfoModel();
 
             info.MerID = "S07753315";
@@ -27,7 +29,7 @@ namespace testuni
             //info.CardCVC = "123";//信用卡安全碼隨意填
             //info.CardExpired = "0530";//MMYY
             
-            payuniAPI test = new payuniAPI(key,iv,type);
+            PayuniAPI test = new PayuniAPI(key,iv,type);
             
             Console.WriteLine(HttpUtility.UrlDecode(test.UniversalTrade(info, tradeType)));
         }

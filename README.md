@@ -3,17 +3,9 @@
 * [安裝](#安裝)
 * [使用方式](#使用方式)
 # 環境需求
-* .NET Framework 4.7.2
+* .NET 8
 # 安裝
 * 請加入PayuniSDK參考至專案
-* 請至NuGet安裝Newtonsoft.Json
-```clike
-NuGet\Install-Package Newtonsoft.Json -Version 13.0.1
-```
-* 請至NuGet安裝Portable.BouncyCastle
-```clike
-NuGet\Install-Package Portable.BouncyCastle -Version 1.9.0
-```
 
 # 使用方式
 * 正式區
@@ -22,7 +14,7 @@ payuniAPI payuniapi = new payuniAPI(key, iv);
 ```
 * 測試區
 ```csharp
-payuniAPI payuniapi = new payuniAPI(key, iv, type);
+payuniAPI payuniapi = new payuniAPI(key, iv, EnviromentType.SandBox);
 ```
 * API串接
 ```csharp
@@ -44,20 +36,54 @@ encryptInfo.Timestamp= DateTimeOffset.UtcNow.ToUnixTimeSeconds().ToString();
     * 請登入PAYUNi平台檢視商店串接資訊取得 Hash Key
   * string merIV
     * 請登入PAYUNi平台檢視商店串接資訊取得 Hash IV
-  * string type (非必填)
-    * 連線測試區 => t
-    * 連線正式區 => 不給該參數或給空值
-  * string mode
-    * 整合式支付頁 => upp
-    * 虛擬帳號幕後 => atm
-    * 超商代碼幕後 => cvs
-    * 信用卡幕後　 => credit
-    * 交易查詢　　 => trade_query
-    * 交易請退款　 => trade_close
-    * 交易取消授權 => trade_cancel
-    * 信用卡Token(約定) => credit_bind_query
-    * 信用卡Token取消(約定/記憶卡號) => credit_bind_cancel
-    * 愛金卡退款(ICASH) => trade_refund_icash
+  * Enum type (非必填，若無填入則為預設值)
+    ```csharp=
+    public enum EnviromentType
+    {
+        // 連線測試區
+        SandBox,
+        // 連線正式區 (default)
+        Production
+    }
+    ```
+  * Enum TradeType:
+    ```csharp=
+    public enum TradeType
+    {
+        // 交易建立 整合式
+        Upp,
+        // 交易建立 虛擬帳號幕後
+        Atm,
+        // 交易建立 超商代碼幕後
+        Cvs,
+        // 交易建立 Line Pay 幕後
+        Linepay,
+        // 交易建立 Aftee 幕後
+        AfteeDirect,
+        // 交易建立 信用卡幕後
+        Credit,
+        // 交易請退款
+        TradeClose,
+        // 交易取消授權
+        TradeCancel,
+        // 後支付確認(Aftee)
+        TradeConfirmAftee,
+        // 交易取消超商代碼(Cvs)
+        CancelCvs,
+        // 信用卡Token取消(約定/記憶卡號)
+        CreditBindCancel,
+        // 愛金卡退款(Icash)
+        TradeRefundIcash,
+        // 後支付退款(Aftee)
+        TradeRefundAftee,
+        // Line Pay退款(Line)
+        TradeRefundLinepay,
+        // 交易查詢
+        TradeQuery,
+        // 信用卡Token查詢(約定)
+        CreditBindQuery,
+    }
+    ```
 * 其餘請參考[範例](https://github.com/payuni/NET_SDK/tree/main/example)
 
 * 原生C#
@@ -70,7 +96,7 @@ EncryptInfoModel encryptInfo = new EncryptInfoModel();
 encryptInfo.MerID = "ABC";
 encryptInfo.TradeNo = "16614190477810373246";
 encryptInfo.Timestamp= DateTimeOffset.UtcNow.ToUnixTimeSeconds().ToString();
-string result = payuniApi.UniversalTrade(encryptInfo, "trade_query");
+string result = payuniApi.UniversalTrade(encryptInfo, TradeType.TradeQuery);
 ```
 # LICENSE
 ```text
