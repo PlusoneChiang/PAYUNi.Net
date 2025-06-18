@@ -8,6 +8,9 @@ using System.Net.Http;
 using System.Threading.Tasks;
 using PayuniSDK.Models;
 using PayuniSDK.Enums;
+using Org.BouncyCastle.Crypto.Modes;
+using Org.BouncyCastle.Crypto.Parameters;
+using Org.BouncyCastle.Crypto.Engines;
 
 namespace PayuniSDK.APIs;
 
@@ -220,47 +223,55 @@ public class PayuniAPI
     /// <param name="CurlResult"></param>
     /// <returns></returns>
     public ResultModel ResultProcess(string CurlResult)
-    {                      
-        ResultModel resultArr = new ResultModel();
-        resultArr.Success = false;
+    {
+        var resultParam = JsonSerializer.Deserialize<ParameterModel>(CurlResult);
+        return ResultProcess(resultParam);
+    }
+
+    public ResultModel ResultProcess(ParameterModel resultParams)
+    {
+        ResultModel result = new()
+        {
+            Success = false
+        };
         try
         {
-            ParameterModel resultParam = new ParameterModel();
-            resultParam = JsonSerializer.Deserialize<ParameterModel>(CurlResult);
-            if (!string.IsNullOrEmpty(resultParam.EncryptInfo))
+            if (!string.IsNullOrEmpty(resultParams.EncryptInfo))
             {
-                if (!string.IsNullOrEmpty(resultParam.HashInfo))
+                if (!string.IsNullOrEmpty(resultParams.HashInfo))
                 {
-                    string chkHash = Hash(resultParam.EncryptInfo);
-                    if (chkHash != resultParam.HashInfo)
+                    string chkHash = Hash(resultParams.EncryptInfo);
+                    if (chkHash != resultParams.HashInfo)
                     {
-                        resultArr.Message = "Hash值比對失敗(Hash mismatch)";
-                        return resultArr;
+                        result.Message = "Hash值比對失敗(Hash mismatch)";
+                        return result;
                     }
-                    resultArr.Message = Decrypt(resultParam.EncryptInfo);
-                    resultArr.Success = true;
+                    result.Message = string.Empty;
+                    result.EncryptInfo = ConvertTo<EncryptInfoModel>(Decrypt(resultParams.EncryptInfo));
+                    result.Success = true;
                 }
                 else
                 {
-                    resultArr.Message = "缺少Hash資訊(missing HashInfo)";
+                    result.Message = "缺少Hash資訊(missing HashInfo)";
                 }
             }
             else
             {
-                resultArr.Message = "缺少加密字串(missing EncryptInfo)";
-                switch (resultParam.Status) {
+                result.Message = "缺少加密字串(missing EncryptInfo)";
+                switch (resultParams.Status)
+                {
                     case "API00003":
-                        resultArr.Message = "無API版本號";
+                        result.Message = "無API版本號";
                         break;
                 }
             }
-            return resultArr;
+            return result;
         }
-        catch
+        catch(Exception ex)
         {
-            resultArr.Message = "傳入參數需為陣列(Result must be an array)";
-            return resultArr;
-        }            
+            result.Message = $"處理結果失敗({ex.Message})";
+            return result;
+        }
     }
 
     /// <summary>
@@ -288,8 +299,10 @@ public class PayuniAPI
     private async Task<string> CurlApi()
     {
         string parame = GetQueryString(Parameter);
-        var client = new HttpClient();
-        client.Timeout = TimeSpan.FromSeconds(1000);
+        var client = new HttpClient
+        {
+            Timeout = TimeSpan.FromSeconds(1000)
+        };
         client.DefaultRequestHeaders.Add("User-Agent", "PRESCOSDKAPI");
         var content = new StringContent(parame, Encoding.UTF8, "application/x-www-form-urlencoded");
         var response = await client.PostAsync(ApiUrl, content);
@@ -343,7 +356,7 @@ public class PayuniAPI
         Parameter.HashInfo = Hash(Parameter.EncryptInfo);
         Parameter.IsPlatForm = isPlatForm;
 
-        ApiUrl = ApiUrl + type;
+        ApiUrl += type;
     }
     /// <summary>
     /// 檢查必填參數是否存在
@@ -351,8 +364,10 @@ public class PayuniAPI
     /// <returns></returns>
     private ResultModel CheckParams()
     {
-        Result = new ResultModel();
-        Result.Success = false;
+        Result = new ResultModel
+        {
+            Success = false
+        };
         if (string.IsNullOrEmpty(MerKey))
         {
             Result.Message = "key is not setting";
@@ -391,41 +406,68 @@ public class PayuniAPI
     /// </summary>
     /// <param name="obj"></param>
     /// <returns></returns>
-    private string GetQueryString(Object obj)
+    private static string GetQueryString(object obj)
     {
-        var properties = from p in obj.GetType().GetProperties()
-                         where p.GetValue(obj, null) != null
-                         select p.Name + "=" + HttpUtility.UrlEncode(p.GetValue(obj, null).ToString());
-        string queryString = String.Join("&", properties.ToArray());
+        var properties = obj.GetType().GetProperties()
+            .Where(p => p.GetValue(obj, null) != null)
+            .Select(p => $"{p.Name}={HttpUtility.UrlEncode(p.GetValue(obj, null).ToString())}");
+        string queryString = string.Join("&", [.. properties]);
         return queryString;
     }
+
+    /// <summary>
+    /// 轉換QueryString為物件
+    /// </summary>
+    private static T ConvertTo<T>(string queryString) where T : new()
+    {
+        var obj = new T();
+        var properties = typeof(T).GetProperties();
+        var pairs = queryString.Split('&');
+        foreach (var pair in pairs)
+        {
+            var keyValue = pair.Split('=');
+            if (keyValue.Length == 2)
+            {
+                var property = properties.FirstOrDefault(p => p.Name.Equals(keyValue[0], StringComparison.OrdinalIgnoreCase));
+                if (property != null && property.CanWrite)
+                {
+                    property.SetValue(obj, HttpUtility.UrlDecode(keyValue[1]));
+                }
+            }
+        }
+        return obj;
+    }
+
 
     /// <summary>
     /// 加密
     /// </summary>
     /// <returns></returns>
-    private string Encrypt()
+    private static string Encrypt()
     {
         if (string.IsNullOrEmpty(Plain))
         {
             return Plain;
         }
-        
         //參數設定
+        var tagLength = 16;
         var key = Encoding.UTF8.GetBytes(MerKey);
         var iv = Encoding.UTF8.GetBytes(MerIV);
         var plaintextData = Encoding.UTF8.GetBytes(Plain);
-        
-        //使用 .NET 內建的 AesGcm
-        var encrypted = new byte[plaintextData.Length];
-        var tag = new byte[16]; // AES-GCM 標準 tag 長度為 16 bytes
-        
-        using (var aesGcm = new AesGcm(key, 16)) // 指定 tag 大小為 16 bytes
-        {
-            aesGcm.Encrypt(iv, plaintextData, encrypted, tag);
-        }
-
-        return bin2hex(Encoding.UTF8.GetBytes(Convert.ToBase64String(encrypted) + ":::" + Convert.ToBase64String(tag))).Trim();
+        var encryptedTagData = new byte[plaintextData.Length + tagLength];
+        byte[] encrypted = new byte[plaintextData.Length];
+        byte[] tag = new byte[tagLength];
+        //加密設定
+        var cipher = new GcmBlockCipher(new AesEngine());
+        var keyParameters = new AeadParameters(new KeyParameter(key), tagLength * 8, iv);
+        cipher.Init(true, keyParameters);
+        var offset = cipher.ProcessBytes(plaintextData, 0, plaintextData.Length, encryptedTagData, 0);
+        //加密:密文+tag
+        cipher.DoFinal(encryptedTagData, offset);
+        //分解密文和tag
+        Array.Copy(encryptedTagData, encrypted, plaintextData.Length);
+        Array.Copy(encryptedTagData, plaintextData.Length, tag, 0, tagLength);
+        return Bin2hex(Encoding.UTF8.GetBytes(Convert.ToBase64String(encrypted) + ":::" + Convert.ToBase64String(tag))).Trim();
     }
 
     /// <summary>
@@ -433,30 +475,29 @@ public class PayuniAPI
     /// </summary>
     /// <param name="encryptStr"></param>
     /// <returns></returns>
-    private string Decrypt(string encryptStr)
+    private static string Decrypt(string encryptStr)
     {
         if (string.IsNullOrEmpty(encryptStr))
         {
             return encryptStr;
         }
-        
         //參數設定
-        encryptStr = Encoding.UTF8.GetString(hex2bin(encryptStr));
+        encryptStr = Encoding.UTF8.GetString(Hex2bin(encryptStr));
         var key = Encoding.UTF8.GetBytes(MerKey);
         var iv = Encoding.UTF8.GetBytes(MerIV);
-        string[] spliter = { ":::"};
+        string[] spliter = [":::"];
         string[] data = encryptStr.Split(spliter, StringSplitOptions.RemoveEmptyEntries);
-        Byte[] encryptData = Convert.FromBase64String(data[0]);
-        Byte[] tagData = Convert.FromBase64String(data[1]);
-        
-        //使用 .NET 內建的 AesGcm 解密
+        byte[] encryptData = Convert.FromBase64String(data[0]);
+        byte[] tagData = Convert.FromBase64String(data[1]);
+        var encryptedTagData = new byte[encryptData.Length + tagData.Length];
+        Array.Copy(encryptData, 0, encryptedTagData, 0, encryptData.Length);
+        Array.Copy(tagData, 0, encryptedTagData, encryptData.Length, tagData.Length);
+        var cipher = new GcmBlockCipher(new AesEngine());
+        var keyParameters = new AeadParameters(new KeyParameter(key), tagData.Length * 8, iv);
+        cipher.Init(false, keyParameters);
         var result = new byte[encryptData.Length];
-        
-        using (var aesGcm = new AesGcm(key, 16)) // 指定 tag 大小為 16 bytes
-        {
-            aesGcm.Decrypt(iv, encryptData, tagData, result);
-        }
-
+        int len = cipher.ProcessBytes(encryptedTagData, 0, encryptedTagData.Length, result, 0);
+        cipher.DoFinal(result, len);
         return Encoding.UTF8.GetString(result);
     }
 
@@ -465,11 +506,10 @@ public class PayuniAPI
     /// </summary>
     /// <param name="encryptStr"></param>
     /// <returns></returns>
-    private string Hash(string encryptStr = "")
+    private static string Hash(string encryptStr = "")
     {
-        var hash = SHA256.Create();
-        var byteArray = hash.ComputeHash(Encoding.UTF8.GetBytes(MerKey + encryptStr + MerIV));
-        return bin2hex(byteArray).ToUpper();
+        var byteArray = SHA256.HashData(Encoding.UTF8.GetBytes(MerKey + encryptStr + MerIV));
+        return Bin2hex(byteArray).ToUpper();
     }
 
     /// <summary>
@@ -477,15 +517,15 @@ public class PayuniAPI
     /// </summary>
     /// <param name="result"></param>
     /// <returns></returns>
-    private string bin2hex(byte[] result)
+    private static string Bin2hex(byte[] result)
     {
-        StringBuilder sb = new StringBuilder(result.Length * 2);
+        StringBuilder sb = new(result.Length * 2);
         for (int i = 0; i < result.Length; i++)
         {
-            int hight = ((result[i] >> 4) & 0x0f);
+            int hight = (result[i] >> 4) & 0x0f;
             int low = result[i] & 0x0f;
-            sb.Append(hight > 9 ? (char)((hight - 10) + 'a') : (char)(hight + '0'));
-            sb.Append(low > 9 ? (char)((low - 10) + 'a') : (char)(low + '0'));
+            sb.Append(hight > 9 ? (char)(hight - 10 + 'a') : (char)(hight + '0'));
+            sb.Append(low > 9 ? (char)(low - 10 + 'a') : (char)(low + '0'));
         }
         return sb.ToString();
     }
@@ -495,7 +535,7 @@ public class PayuniAPI
     /// </summary>
     /// <param name="hexstring"></param>
     /// <returns></returns>
-    private byte[] hex2bin(string hexstring)
+    private static byte[] Hex2bin(string hexstring)
     {
         hexstring = hexstring.Replace(" ", "");
         if ((hexstring.Length % 2) != 0)

@@ -8,4 +8,7 @@
     <AssemblyVersion>1.10.8930.18610</AssemblyVersion>
     <FileVersion>1.10.8930.18610</FileVersion>
   </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="BouncyCastle.NetCore" Version="2.2.1" />
+  </ItemGroup>
 </Project>
