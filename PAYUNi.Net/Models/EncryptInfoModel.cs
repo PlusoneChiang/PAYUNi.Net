@@ -1,6 +1,6 @@
-﻿namespace PayuniSDK.Models;
+﻿namespace PAYUNiSDK.Models;
 
-public class EncryptInfoModel
+public class EncryptInfoModel : SDKBaseModel
 {
     public string MerID { get; set; }
     public string MerTradeNo { get; set; }
