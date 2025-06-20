@@ -1,5 +1,7 @@
 global using System;
 global using System.Linq;
+global using System.IO;
+global using Microsoft.Extensions.Options;
 global using System.Threading.Tasks;
 global using PAYUNiSDK.Models;
 global using PAYUNiSDK.Extensions;
@@ -8,7 +10,7 @@ global using PAYUNiSDK.Helpers;
 global using System.Security.Cryptography;
 global using System.Text;
 global using System.Web;
-global using System.Text.Json;
+global using Newtonsoft.Json;
 global using System.Net.Http;
 global using Org.BouncyCastle.Crypto.Modes;
 global using Org.BouncyCastle.Crypto.Parameters;

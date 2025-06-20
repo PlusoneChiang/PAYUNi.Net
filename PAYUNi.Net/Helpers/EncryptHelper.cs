@@ -72,7 +72,8 @@ internal static class EncryptHelper
     /// <returns></returns>
     public static string Hash(string encryptStr)
     {
-        var byteArray = SHA256.HashData(Encoding.UTF8.GetBytes(encryptStr));
+        using var sha256 = SHA256.Create();
+        var byteArray = sha256.ComputeHash(Encoding.UTF8.GetBytes(encryptStr));
         return Bin2hex(byteArray).ToUpper();
     }
 

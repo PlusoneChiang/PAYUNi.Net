@@ -1,6 +1,3 @@
-using System.IO;
-using Microsoft.Extensions.Options;
-
 namespace PAYUNiSDK;
 
 public class PAYUNiClient(IOptions<PAYUNiSettings> options)
@@ -40,7 +37,7 @@ public class PAYUNiClient(IOptions<PAYUNiSettings> options)
         else
         {
             string CurlResult = ApiCall(parameter).Result;
-            return JsonSerializer.Serialize(ResultProcess(CurlResult));
+            return JsonConvert.SerializeObject(ResultProcess(CurlResult));
         }
     }
 
@@ -51,7 +48,7 @@ public class PAYUNiClient(IOptions<PAYUNiSettings> options)
     /// <returns></returns>
     public ResultModel ResultProcess(string CurlResult)
     {
-        var resultParam = JsonSerializer.Deserialize<ParameterModel>(CurlResult);
+        var resultParam = JsonConvert.DeserializeObject<ParameterModel>(CurlResult);
         return ResultProcess(resultParam);
     }
 
