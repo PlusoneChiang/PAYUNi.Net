@@ -18,7 +18,7 @@ public class PAYUNiClient(IOptions<PAYUNiSettings> options)
     /// <param name="tradeType"></param>
     /// <param name="version"></param>
     /// <returns></returns>
-    public string UniversalTrade(EncryptInfoModel encryptInfo, PAYUNiTradeType tradeType, string version = "1.0")
+    public string UniversalTrade(EncryptInfoRequestModel encryptInfo, PAYUNiTradeType tradeType, string version = "1.0")
     {
         var parameter = new ParameterModel
         {
@@ -73,7 +73,7 @@ public class PAYUNiClient(IOptions<PAYUNiSettings> options)
                 throw new PAYUNiException(ErrorCodes.HashMismatch);
             result.Message = string.Empty;
             var decryptStr = EncryptHelper.Decrypt(resultParams.EncryptInfo, clientSettings.MerchantKey, clientSettings.MerchantIV);
-            result.EncryptInfo = decryptStr.ConvertTo<EncryptInfoModel>();
+            result.EncryptInfo = decryptStr.ConvertTo<EncryptInfoResponseModel>();
             result.Success = true;
             return result;
         }
@@ -154,7 +154,7 @@ public class PAYUNiClient(IOptions<PAYUNiSettings> options)
     /// 設定要curl的參數
     /// </summary>
     /// <param name="type"></param>
-    private void MapQueryParams(EncryptInfoModel encryptInfo, ParameterModel parameter)
+    private void MapQueryParams(EncryptInfoRequestModel encryptInfo, ParameterModel parameter)
     {
         string isPlatForm = clientSettings.IsPlatForm ? "1" : string.Empty;
         if (!string.IsNullOrEmpty(encryptInfo.IsPlatForm))
@@ -173,7 +173,7 @@ public class PAYUNiClient(IOptions<PAYUNiSettings> options)
     /// 檢查必填參數是否存在
     /// </summary>
     /// <returns></returns>
-    private void CheckRequiredParams(EncryptInfoModel encryptInfo)
+    private void CheckRequiredParams(EncryptInfoRequestModel encryptInfo)
     {
         if (string.IsNullOrWhiteSpace(clientSettings.MerchantId))
             throw new PAYUNiException(ErrorCodes.MissingMerID);
@@ -194,7 +194,7 @@ public class PAYUNiClient(IOptions<PAYUNiSettings> options)
     /// </summary>
     /// <param name="tradeType"></param>
     /// <param name="encryptInfo"></param>
-    private void CheckRequiredParamsByTradeType(PAYUNiTradeType tradeType, EncryptInfoModel encryptInfo)
+    private void CheckRequiredParamsByTradeType(PAYUNiTradeType tradeType, EncryptInfoRequestModel encryptInfo)
     {
         switch (tradeType)
         {

@@ -1,11 +1,11 @@
 ﻿namespace PAYUNiSDK.Models;
 
-public class EncryptInfoModel : SDKBaseModel
+public class EncryptInfoRequestModel : SDKBaseModel
 {
     public string MerID { get; set; }
     public string MerTradeNo { get; set; }
     public string TradeAmt { get; set; }
-    public string Timestamp { get; set; }
+    public string Timestamp { get; set; } = DateTimeOffset.UtcNow.ToUnixTimeSeconds().ToString();
     //UPP
     public string ReturnURL { get; set; }
     public string NotifyURL { get; set; }
@@ -49,4 +49,14 @@ public class EncryptInfoModel : SDKBaseModel
     //credit_bind_cancel
     public string BindVal { get; set; }
     public string IsPlatForm { get; set; }
+    public string Ship { get; set; }
+    public string TradeInvoice { get; set; }
+    public string Lang { get; set; } = "zh-TW";
+
+    // third party payment
+    public string ApplePay { get; set; }
+    public string GooglePay { get; set; }
+    public string SamsungPay { get; set; }
+    public string LinePay { get; set; }
+    public string Union3D { get; set; }
 }

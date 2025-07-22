@@ -1,7 +1,5 @@
 namespace PAYUNiSDK.Enums;
 
-
-
 public enum PAYUNiTradeType
 {
     /// <summary>
